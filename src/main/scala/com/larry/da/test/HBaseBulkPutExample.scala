@@ -28,9 +28,6 @@ object HBaseBulkPutExample {
     val tableName = "userdigestuid_test";
     val columnFamily = "cf1";
 
-//    val sparkConf = new SparkConf().setAppName("HBaseBulkPutExample " + tableName + " " + columnFamily)
-//    val sc = new SparkContext(sparkConf)
-
     /********************************************************
     * hbase行要求:
     * (key,Array((cf,fieldname,value),(cf,fieldname,value)))
