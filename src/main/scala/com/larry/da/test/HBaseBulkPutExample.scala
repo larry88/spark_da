@@ -14,7 +14,7 @@ import org.apache.spark.SparkContext
 
 
 object HBaseBulkPutExample {
-  val sc:SparkContext = _
+  var sc:SparkContext = _
 
   def main(args: Array[String]) {
 //    if (args.length == 0) {
