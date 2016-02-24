@@ -19,7 +19,7 @@ object LogParseUtil {
   /** *******************************************************************
     *               RDD
     * dspRdd: logtype: bidder,adshow,cm,tt
-    *         channel: baidu,tanx (1 mathine: tanxbid1),""(for aws adx)
+    *         channel: baidu,tanx,bid (1 mathine: tanxbid1)
     * ttRdd: logType: pv,track
     * tagRdd : logType: inc,all
     *         channel:baidu,tanx,adx
