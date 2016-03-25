@@ -27,9 +27,9 @@ import scala.collection.mutable.ArrayBuffer
 
 /*
 
-import com.larry.da.jobs.idmap.Person
-import com.larry.da.jobs.idmap.Config
-import com.larry.da.jobs.idmap.Utils
+import com.agrantsem.dm.jobs.idmap.Person
+import com.agrantsem.dm.jobs.idmap.Config
+import com.agrantsem.dm.jobs.idmap.Utils
 
 */
 
@@ -41,12 +41,13 @@ object IdMapHistory {
   var graphParallelism = 20 // sc.defaultParallelism
   val partitionCount = Config.partitionCount
   val historyPath = "/user/dauser/aguid/history"
+  val hbaseOutPath = "/user/dauser/aguid/hbase_output"
   val hbasePath = "/user/dauser/aguid/hbase"
   val idmapPath = "/user/dauser/aguid/idmap"
   val hourlyPath = "/user/dauser/aguid/hourly"
-  val hbaseOutPath = "/user/dauser/aguid/hbase_output"
 
   val verticesLimit = 50
+  val verticesLimitAll = 5000
   val logtimeFormat=new SimpleDateFormat("yyyy-MM-dd-HH");
 
   var mergeData:RDD[Person] = _
@@ -96,15 +97,16 @@ object IdMapHistory {
     rdd.map(p => {
       ((p.uid, p.idType), p)
     }).aggregateByKey(new ArrayBuffer[Person], parallelism)(
-      (arr, v) => arr += v,
-      (arr1, arr2) => arr1 ++= arr2
-    ).map(x => {
+      //desert size >= 5000
+      (arr, v) => if(arr.size > verticesLimitAll) arr else arr += v ,
+      (arr1, arr2) => if(arr1.size > verticesLimitAll) arr1 else if(arr2.size > verticesLimitAll) arr2 else arr1 ++= arr2
+    ).filter(_._2.size<verticesLimitAll).map(x => {
       val ((uid, idType), list) = x;
       (uid, (idType, list.sortWith((a, b) => a.time > b.time).map(p => Array(p.cid, p.time, p.num).mkString("|")).mkString(","), list.length))
     }).aggregateByKey(new ArrayBuffer[(Int, String, Int)])(
       (arr, v) => arr += v,
       (arr1, arr2) => arr1 ++= arr2
-    ).map(x => {
+    ).filter(_._2.size < verticesLimitAll).map(x => {
       val (uid, list) = x;
       val idsText = ArrayBuffer("", "", "", "", "")
       var vertexCount = 0;
@@ -123,9 +125,10 @@ object IdMapHistory {
       val (u1, (u2, time)) = x
       (u2, (u1, time))
     }).aggregateByKey(new ArrayBuffer[(Long, Int)])(
-      (arr, v) => arr += v,
-      (arr1, arr2) => arr1 ++= arr2
-    ).flatMap(x => {
+      //desert size >= 5000
+      (arr, v) => if(arr.size > verticesLimitAll) arr else arr += v ,
+      (arr1, arr2) => if(arr1.size > verticesLimitAll) arr1 else if(arr2.size > verticesLimitAll) arr2 else arr1 ++= arr2
+    ).filter(_._2.size < verticesLimitAll).flatMap(x => {
       val (uid, list) = x;
       var oldest = list.head
       list.foreach(p => if (p._2 < oldest._2) oldest = p else if (p._2 == oldest._2 && p._1 < oldest._1) oldest = p)
@@ -194,6 +197,7 @@ object IdMapHistory {
       val res = rdd.coalesce(parallelism, true).map(p => { p.uid = uidChangeDic.value.getOrElse(p.uid,p.uid); p }).cache()
       res.filter(p => p.idType == 1).map(p => Array(p.cid, Utils.compressAguid(p.uid), p.time).mkString("\t")).coalesce(parallelism, true).saveAsTextFile(s"${idmapPath}/$hour/agsid", classOf[GzipCodec]);
       res.filter(p => p.idType != 1 && p.idType != 5).map(p => Array(p.cid, Utils.compressAguid(p.uid), p.idType, p.time).mkString("\t")).coalesce(parallelism, true).saveAsTextFile(s"${idmapPath}/$hour/channelid", classOf[GzipCodec])
+      res.unpersist()
     })
 
     //----------save index---------
@@ -222,27 +226,21 @@ object IdMapHistory {
     ))
     sc = new SparkContext(conf)
 
-    //    val args = "2016-01-18-00 - 8 1 150 11".split(" ")
-    1 to args.length zip args foreach(println)
+    //    val args = "2016-03-20-16 - 8 1 150 11".split(" ")
+    1 to args.length zip args foreach(x=>println(s"------------------- arg ${x._1}\t=\t${x._2}"))
     val Array(current,lastHistoryArg,hourSpanStr,runCountStr,parallelismArg,methods) = args
     parallelism = parallelismArg.toInt
-    graphParallelism = parallelism/3
+    graphParallelism = parallelism/4
     val hourSpan = hourSpanStr.toInt
     val runCount = runCountStr.toInt
     var lastHistory = if( lastHistoryArg.length < 2) "" else lastHistoryArg
     val sdf=new SimpleDateFormat("yyyy-MM-dd-HH");
     val runHour= Calendar.getInstance()
-    println("-----------------------")
-    println(parallelism)
-    println(graphParallelism)
-    println(partitionCount)
-    println(historyPath)
-    println(hbasePath)
-    println(idmapPath)
-    println(hourlyPath)
-    println(hbaseOutPath)
-    println(methods)
-    println("-----------------------")
+
+    "parallelism,graphParallelism,partitionCount,historyPath,hbasePath,idmapPath,hourlyPath,hbaseOutPath,methods".split(",").zip( Array(
+      parallelism,graphParallelism,partitionCount,historyPath,hbasePath,idmapPath,hourlyPath,hbaseOutPath,methods
+    ).map(_.toString)).foreach(x=>println(s"------------------- ${x._1}\t=\t${x._2}"))
+
     0 until runCount foreach(span => {
       val hourList = new ArrayBuffer[String]
       runHour.setTime(sdf.parse(current))
@@ -256,14 +254,15 @@ object IdMapHistory {
       if(methods(0) == '1') com.larry.da.jobs.idmap.IdMapHourly.computeHourList(sc,parallelism,hourList)
       if(methods(1) == '1') compute(hourString,lastHourString);save(hourString)
       val endHourOfList = hourList.last
-      println("---------------------------------")
-      println(hourString + ";" + lastHourString)
-      println("endHourOfList is : " + endHourOfList)
-      println("---------------------------------")
+      println(s"-------------------${hourString};${lastHourString}")
+      println(s"-------------------endHourOfList=${endHourOfList}")
       if(endHourOfList.endsWith("23")){
         if(methods(1) == '1') com.larry.da.jobs.userdigest.ChannelIdMerge.mergeIdMap(sc,endHourOfList.take(10))
       }
     })
+    sc.stop()
+
+    //val Array(hourList,historyHour) = "2016-03-20-16,2016-03-20-17,2016-03-20-18,2016-03-20-19,2016-03-20-20,2016-03-20-21,2016-03-20-22,2016-03-20-23;2016-03-20-15".split(";")
   }
 
 

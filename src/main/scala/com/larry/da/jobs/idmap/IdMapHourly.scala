@@ -114,8 +114,10 @@ object IdMapHourly {
     grapParallelism = para / 3
 
     val fileHours = getFileHour(hourList)
+    val sourceDir = Config.getDataSource();
+    sourceDir.foreach(d=>println("----------------------- source dir : " + d))
     val rdd = sc.union(
-      Config.getDataSource().flatMap(d=> fileHours.map(h => d.replace("{YYYY-MM-DD-HH}",h)))
+      sourceDir.flatMap(d=> fileHours.map(h => d.replace("{YYYY-MM-DD-HH}",h)))
         .map(s=>
           sc.textFile(s).map(_.split("\t",-1)).filter(_.size >= 5).map(_.take(5)).map(x=>{
             val Array(time,id1,id1Type,id2,id2Type) = x.map(d=>{ val v = d.trim; if (v == "null") "" else v })

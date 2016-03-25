@@ -177,15 +177,24 @@ object LogParseUtil {
     map
   }
 
+
+
   //pv log
   val pvFields="time,ip,agsid,tid,url,query,useragent".split(",")
   val oldFields="time,ip,custid,eventid,agsid,evtp1,evtp2,evtp3,evtp4,tid,url,cookie,query,useragent,creative,keyword".split(",")
-  def pvLog(txt:String)={
+  def pvLog(txt:String,parseQuey:Boolean = false)={
     val item = txt.split("""\|~\||\t""")
     val tuple = if(item.length == 7) pvFields zip item else oldFields zip item
-    Map(tuple toSeq :_*)
-  }
 
+    if(parseQuey){
+      val querys = tuple.filter(p=>p._1 == "query")
+      val query = if(querys.size > 0) querys.head._2 else ""
+      val tuple2 =  query.split("&").map(_.split("=",2)).filter(_.size > 1).map(x=>x(0) -> x(1))
+      Map( (tuple ++ tuple2 ) toSeq : _* )
+    }else{
+      Map(tuple toSeq :_*)
+    }
+  }
 
 
 

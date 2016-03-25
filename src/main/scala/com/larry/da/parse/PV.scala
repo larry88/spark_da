@@ -11,11 +11,37 @@ import scala.collection.mutable.{ArrayBuffer, HashMap}
  */
 object PV {
   var sc:SparkContext = _ ;
+  import com.larry.da.util.{LogParseUtil => U}
 
+
+
+  def tt10(): Unit ={
+
+    //  import com.agrantsem.dm.util.{LogParseUtil => U}
+    val log = U.pvRdd(sc,"tracking","2016-03-16")
+//    log.map(_.split("""\|~\||\t""",-1).length).map((_,1)).reduceByKey(_+_).collect.foreach(println)
+
+    val data = log.filter( x=>{
+      val arr = x.split("""\|~\||\t""",-1)
+      val yes =  if(arr.size == 7 && x.contains("ag_kwid")) 1 else if(arr.size == 16) 1 else 0
+      yes == 1
+    }).map(x=>{
+      val d = U.pvLog(x)
+      ("all",d.getOrElse("agsid",null)) -> 1
+    }).reduceByKey(_+_).map(x=>{
+      val((key,agsid),num) =x;
+      key ->(1,num)
+    }).reduceByKey((a,b)=>(a._1 + b._1,a._2 + b._2))
+
+   data.collect().foreach(println)
+
+    val a =  ArrayBuffer("3")
+
+
+  }
 
   def tt1(): Unit ={
 
-    import com.larry.da.util.{LogParseUtil => U}
     val log = U.pvRdd(sc,"tracking","2016-01-20")
     val pre = log.filter(x=>x.split("""\|~\||\t""",-1).length > 8).map(U.pvLog(_)).map(d=>d.getOrElse("agsid","null")).filter(_ != "null")
     val post = log.filter(x=>x.contains("atstd=") && !x.contains("atstd=&")).map(U.pvLog(_)).map(d=>d.getOrElse("agsid","null")).filter(_ != "null")
