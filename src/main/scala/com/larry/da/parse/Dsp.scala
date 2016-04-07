@@ -139,7 +139,7 @@ class Dsp {
 
 
     val aws = "aws".split(",").map(channel =>{
-      static_tag_v_count(channel,"2016-03-24-09,2016-03-24-15,2016-03-24-16").collect()
+      static_tag_v_count(channel,"2016-03-24").collect()
     })
     aws.foreach(arr=> arr.foreach(println _))
 
