@@ -1,19 +1,19 @@
-<mxfile host="app.diagrams.net" modified="2022-01-11T13:49:08.586Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36" etag="qJEx68Lpb8xuAG_RoHkl" version="15.9.4" type="github">
+<mxfile host="app.diagrams.net" modified="2022-01-11T13:50:29.532Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36" etag="lgnW4BqTNJOJd30KuRBA" version="15.9.4" type="github">
   <diagram id="KWutMWNyroLXFu-Uuygp" name="第 1 页">
     <mxGraphModel dx="1042" dy="649" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="3by76ySDp9JKEpjKMYPq-1" value="版本A1&lt;br&gt;10%" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="3by76ySDp9JKEpjKMYPq-1" value="首页A1&lt;br&gt;10%" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="160" y="220" width="100" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="3by76ySDp9JKEpjKMYPq-2" value="版本B1&lt;br&gt;10%" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="3by76ySDp9JKEpjKMYPq-2" value="首页B1&lt;br&gt;10%" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="280" y="220" width="100" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="3by76ySDp9JKEpjKMYPq-3" value="版本A2&lt;br&gt;10%" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="3by76ySDp9JKEpjKMYPq-3" value="详情A2&lt;br&gt;10%" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="400" y="220" width="100" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="3by76ySDp9JKEpjKMYPq-4" value="版本B2&lt;br&gt;10%" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="3by76ySDp9JKEpjKMYPq-4" value="详情B2&lt;br&gt;10%" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="520" y="220" width="100" height="50" as="geometry" />
         </mxCell>
         <mxCell id="3by76ySDp9JKEpjKMYPq-6" value="&lt;b&gt;在一个实验中，创建2对，一共4个版本&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#9AC7BF;strokeColor=#FFFFFF;" vertex="1" parent="1">
